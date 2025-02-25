@@ -1,5 +1,3 @@
-
-
 async function sendMessage() {
     const userInput = document.getElementById('userInput');
     const chatBox = document.getElementById('chatBox');
@@ -55,41 +53,3 @@ document.getElementById('userInput').addEventListener('keypress', function(e) {
         sendMessage();
     }
 });
-
-async function sendMessage() {
-    const userInput = document.getElementById('userInput');
-    const chatBox = document.getElementById('chatBox');
-    const message = userInput.value.trim();
-
-    if (message === '') return;
-
-    // Add user message to chat
-    appendMessage('user', message);
-    userInput.value = '';
-
-    // Call OpenAI API
-    try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${OPENAI_API_KEY}`
-            },
-            body: JSON.stringify({
-                model: "gpt-3.5-turbo",
-                messages: [{
-                    role: "user",
-                    content: message
-                }],
-                max_tokens: 150
-            })
-        });
-
-        const data = await response.json();
-        const botResponse = data.choices[0].message.content;
-        appendMessage('bot', botResponse);
-    } catch (error) {
-        console.error('Error:', error);
-        appendMessage('bot', 'Sorry, I encountered an error. Please try again.');
-    }
-}
