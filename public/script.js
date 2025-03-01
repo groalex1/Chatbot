@@ -1,15 +1,22 @@
+// public/script.js
+let isProcessing = false; // Prevent multiple simultaneous requests
+
 async function sendMessage() {
+    if (isProcessing) return;
+    
     const userInput = document.getElementById('userInput');
     const chatBox = document.getElementById('chatBox');
     const message = userInput.value.trim();
 
     if (message === '') return;
-
-    // Add user message to chat
+    
+    isProcessing = true;
+    
+    // Display user's message in chat
     appendMessage('user', message);
     userInput.value = '';
 
-    // Show loading indicator
+    // Show typing indicator
     const loadingDiv = document.createElement('div');
     loadingDiv.className = 'message bot-message loading';
     loadingDiv.textContent = 'Typing...';
@@ -26,6 +33,9 @@ async function sendMessage() {
 
         const data = await response.json();
 
+        // Remove loading indicator
+        chatBox.removeChild(loadingDiv);
+
         if (data.error) {
             throw new Error(data.error);
         }
@@ -33,8 +43,10 @@ async function sendMessage() {
         appendMessage('bot', data.response);
     } catch (error) {
         console.error('Error:', error);
-
+        chatBox.removeChild(loadingDiv);
         appendMessage('bot', 'Sorry, I encountered an error. Please try again.');
+    } finally {
+        isProcessing = false;
     }
 }
 
@@ -47,9 +59,10 @@ function appendMessage(sender, message) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Allow sending message with Enter key
+// Event listeners
 document.getElementById('userInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
         sendMessage();
     }
 });
